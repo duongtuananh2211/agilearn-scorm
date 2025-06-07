@@ -1,14 +1,22 @@
 "use client";
 
-import React from "react";
-// import { useAuth } from "reactfire";
-// import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "reactfire";
+import { useAuth, useUser } from "reactfire";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const auth = useAuth();
+  const { data: user, status } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === "success" && user) {
+      router.replace("/");
+    }
+  }, [user, status, router]);
+
   const handleGoogleSignIn = async () => {
     try {
       const provider = new GoogleAuthProvider();

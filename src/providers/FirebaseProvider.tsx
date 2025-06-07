@@ -1,8 +1,14 @@
 "use client";
 
 import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 import { PropsWithChildren, useMemo } from "react";
-import { AuthProvider, FirebaseAppProvider, useFirebaseApp } from "reactfire";
+import {
+  AuthProvider,
+  FirebaseAppProvider,
+  FirestoreProvider,
+  useFirebaseApp,
+} from "reactfire";
 
 const FirebaseServicesProvider: React.FC<PropsWithChildren> = ({
   children,
@@ -10,10 +16,13 @@ const FirebaseServicesProvider: React.FC<PropsWithChildren> = ({
   const firebaseApp = useFirebaseApp();
 
   const auth = useMemo(() => getAuth(firebaseApp), [firebaseApp]);
+  const firestore = useMemo(() => getFirestore(firebaseApp), [firebaseApp]);
 
   return (
     <>
-      <AuthProvider sdk={auth}>{children}</AuthProvider>
+      <AuthProvider sdk={auth}>
+        <FirestoreProvider sdk={firestore}>{children}</FirestoreProvider>
+      </AuthProvider>
     </>
   );
 };
