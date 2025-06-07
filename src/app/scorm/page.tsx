@@ -1,20 +1,35 @@
 "use client";
 
 import { collection, limit, query, where } from "firebase/firestore";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useFirestore, useFirestoreCollectionData } from "reactfire";
 import { Scorm12API, Scorm2004API } from "scorm-again";
 
+// Extend the Window interface to include SCORM API properties
+declare global {
+  interface Window {
+    API?: Scorm12API;
+    API_1484_11?: Scorm2004API;
+  }
+}
+
 export default function ScormPage() {
-  const path = new URLSearchParams(window.location.search).get("path");
+  const [path, setPath] = useState<string | null>(null);
 
   const firestore = useFirestore();
   const { data, status } = useFirestoreCollectionData(
-    query(collection(firestore, "scorms"), where("path", "==", path), limit(1))
+    path
+      ? query(
+          collection(firestore, "scorms"),
+          where("path", "==", path),
+          limit(1)
+        )
+      : query(collection(firestore, "scorms"), limit(1))
   );
 
   useEffect(() => {
-    if (window) {
+    if (typeof window !== "undefined") {
+      setPath(new URLSearchParams(window.location.search).get("path"));
       window.API = new Scorm12API({
         logLevel: 2,
       });
@@ -22,7 +37,7 @@ export default function ScormPage() {
     }
   }, []);
 
-  if (status !== "success" || !data[0]) return null;
+  if (status !== "success" || !data[0] || !path) return null;
 
   const target = data[0];
   return (

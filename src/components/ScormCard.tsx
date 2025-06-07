@@ -39,7 +39,7 @@ export default function ScormCard({ scorm }: { scorm: Scorm }) {
     } finally {
       setIsDownloading(false);
     }
-  }, [scorm.resourcePaths, scorm.path]);
+  }, [scorm.resourcePaths, scorm.path, scorm.id]);
 
   return (
     <Card>
