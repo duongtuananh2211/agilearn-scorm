@@ -3,15 +3,20 @@
 import { Scorm } from "@/app/types/types";
 import { Card, CardContent, CardHeader } from "./ui/card";
 import { Button } from "./ui/button";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Loader2Icon } from "lucide-react";
 
 export default function ScormCard({ scorm }: { scorm: Scorm }) {
   const [isDownloading, setIsDownloading] = useState(false);
   const [dowloadProgress, setDownloadProgress] = useState(0);
-  const [isDownloaded, setIsDownloaded] = useState(
-    localStorage.getItem(`scorm-${scorm.id}`) === "true"
-  );
+  const [isDownloaded, setIsDownloaded] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsDownloaded(localStorage.getItem(`scorm-${scorm.id}`) === "true");
+    }
+  }, [setIsDownloaded, scorm.id]);
+
   const handleDownload = useCallback(async () => {
     setIsDownloading(true);
 
@@ -32,7 +37,9 @@ export default function ScormCard({ scorm }: { scorm: Scorm }) {
       }
 
       /// save the resource state to the user's device
-      localStorage.setItem(`scorm-${scorm.id}`, "true");
+      if (typeof window !== "undefined") {
+        localStorage.setItem(`scorm-${scorm.id}`, "true");
+      }
       setIsDownloaded(true);
     } catch (error) {
       console.error("Error downloading SCORM resources:", error);
