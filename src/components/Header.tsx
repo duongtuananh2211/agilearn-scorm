@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { useUser } from "reactfire";
 import { useLogout } from "@/hooks/useLogout";
 import { Button } from "@/components/ui/button";
