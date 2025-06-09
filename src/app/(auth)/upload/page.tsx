@@ -2,6 +2,8 @@
 
 import { Button } from "@/components/ui/button";
 import { addDoc, collection } from "firebase/firestore";
+import { ChevronLeft } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
@@ -77,6 +79,12 @@ const UploadPage = () => {
 
   return (
     <div style={{ maxWidth: 600, margin: "0 auto", padding: 32 }}>
+      <Link href={"/"}>
+        <Button variant={"ghost"}>
+          <ChevronLeft /> Back to home
+        </Button>
+      </Link>
+
       <div
         {...getRootProps()}
         style={{

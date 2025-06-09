@@ -22,7 +22,7 @@ export default function Home() {
 
   if (!data) return null;
   return (
-    <div className="container mx-auto grid grid-cols-4 pt-10 pb-10 gap-5">
+    <div className="container px-5 md:px-0 md:mx-auto grid grid-cols-1 md:grid-cols-4 pt-10 pb-10 gap-5 ">
       <Card className="bg-primary">
         <CardContent className="h-full">
           <div className="flex flex-col items-center justify-center h-full gap-5">
