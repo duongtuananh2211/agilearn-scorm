@@ -3,7 +3,7 @@ import path from "path";
 import fs from "fs/promises";
 import { existsSync, mkdirSync, createReadStream } from "fs";
 import unzipper from "unzipper";
-import xml2js from "xml2js";
+import { parseManifest } from "../lib/scorm";
 
 function slugify(str: string) {
   return str
@@ -21,39 +21,6 @@ async function extractZip(zipPath: string, destDir: string) {
       .on("close", resolve)
       .on("error", reject);
   });
-}
-
-async function parseManifest(manifestPath: string) {
-  let resourcePaths: string[] = [];
-  let indexFilePath: string | null = null;
-  try {
-    const manifestContent = await fs.readFile(manifestPath, "utf-8");
-    const parser = new xml2js.Parser();
-    const manifest = await parser.parseStringPromise(manifestContent);
-    type ResourceType = { $?: { href?: string }; file?: Array<{ $?: { href?: string } }> };
-    const resources = manifest?.manifest?.resources?.[0]?.resource as Array<ResourceType>;
-    if (Array.isArray(resources)) {
-      for (const res of resources) {
-        if (res.$?.href) {
-          resourcePaths.push(res.$.href);
-          if (!indexFilePath) {
-            indexFilePath = res.$.href;
-          }
-        }
-        if (Array.isArray(res.file)) {
-          for (const file of res.file) {
-            if (file.$?.href) {
-              resourcePaths.push(file.$.href);
-            }
-          }
-        }
-      }
-    }
-  } catch {
-    resourcePaths = [];
-    indexFilePath = null;
-  }
-  return { resourcePaths, indexFilePath };
 }
 
 export const POST = async (req: NextRequest) => {
@@ -92,6 +59,9 @@ export const POST = async (req: NextRequest) => {
       indexFilePath,
     });
   } catch (error) {
-    return NextResponse.json({ error: (error as Error).message }, { status: 500 });
+    return NextResponse.json(
+      { error: (error as Error).message },
+      { status: 500 }
+    );
   }
 };

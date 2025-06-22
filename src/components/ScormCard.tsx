@@ -64,6 +64,14 @@ export default function ScormCard({ scorm }: { scorm: Scorm }) {
           Play
         </Button>
 
+        <Button
+          onClick={() =>
+            navigator.clipboard.writeText(scorm.path.replace("/scorms/", ""))
+          }
+        >
+          Copy path
+        </Button>
+
         {isDownloaded ? (
           <div className="h-full flex items-center font-bold">Downloaded</div>
         ) : (
