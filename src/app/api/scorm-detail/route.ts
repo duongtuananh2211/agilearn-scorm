@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
-import fs from "fs/promises";
 import { parseManifest } from "../lib/scorm";
 
 // GET /api/scorm-detail?name=phan-loai-rac-thai-off
@@ -27,20 +26,4 @@ export async function GET(req: NextRequest) {
     const errorMsg = e instanceof Error ? e.message : "Unknown error";
     return NextResponse.json({ error: errorMsg }, { status: 404 });
   }
-}
-
-// Recursively get all files in the SCORM package
-async function getFiles(dir: string, baseDir: string): Promise<string[]> {
-  const dirents = await fs.readdir(dir, { withFileTypes: true });
-  const files = await Promise.all(
-    dirents.map(async (dirent) => {
-      const res = path.resolve(dir, dirent.name);
-      if (dirent.isDirectory()) {
-        return getFiles(res, baseDir);
-      } else {
-        return path.relative(baseDir, res);
-      }
-    })
-  );
-  return Array.prototype.concat(...files);
 }
