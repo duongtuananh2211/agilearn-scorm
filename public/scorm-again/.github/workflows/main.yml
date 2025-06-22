@@ -1,0 +1,79 @@
+name: Node.js CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Set up Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'yarn'
+
+      # Install dependencies
+      - name: Install dependencies
+        run: yarn install
+
+      # Create required directories
+      - name: Create directories
+        run: mkdir -p reports dist docs test-results
+
+      # Run Mocha tests
+      - name: Run tests with Mocha
+        run: |
+          export TS_NODE_COMPILER_OPTIONS="{\"module\":\"commonjs\"}"
+          yarn run test:coverage
+
+        # Upload test results to GitHub
+      - uses: dorny/test-reporter@v1
+        with:
+          name: Test Reporter
+          path: test-results.json
+          reporter: mocha-json
+
+      # Run ESLint
+      - name: Run ESLint
+        run: |
+          ./node_modules/.bin/eslint ./src --format junit --output-file ./reports/eslint/eslint.xml
+
+      # Generate code coverage report and upload to Code Climate
+      - name: Upload Code Coverage Report
+        uses: paambaati/codeclimate-action@v9.0.0
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        with:
+          coverageCommand: yarn run test:coverage
+          coverageLocations: |
+            ${{github.workspace}}/coverage/lcov.info:lcov
+          debug: 'true'
+
+      # Format code with Prettier
+      - name: Format code with Prettier
+        run: yarn run prettier
+
+      # Build the project
+      - name: Build project
+        run: yarn run compile
+
+      - name: Commit and Push Dist Folder
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: '[skip ci] Add dist folder'
+          file_pattern: 'dist/*.* src/**/*.* test/**/*.* src/*.* test/*.*'
+          skip_dirty_check: false

@@ -13,6 +13,70 @@ app.prepare().then(() => {
     const parsedUrl = parse(req.url, true);
 
     // if target is /scorms/* and the file exists, serve it directly
+
+    console.log("test", parsedUrl.pathname);
+    if (parsedUrl.pathname.startsWith("/scorm-player")) {
+      console.log("Redirecting to SCORM player");
+      // Redirect to the SCORM player page
+
+      const searchParams = new URLSearchParams(parsedUrl.query);
+      const path = searchParams.get("path");
+
+      console.log("SCORM Player path:", path);
+
+      if (!path) {
+        res.writeHead(400, { "Content-Type": "text/plain" });
+        res.end("Missing 'path' query parameter");
+        return;
+      }
+
+      res.end(`<!DOCTYPE html>
+        <html>
+          <head>
+            <title>SCORM Player</title>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+            <style>
+              body, html {
+                margin: 0;
+                padding: 0;
+                height: 100%;
+                overflow: hidden;
+              }
+              #scorm-player {
+                width: 100%;
+                height: 100%;
+                border: none;
+              }
+            </style>
+          
+            </head>
+          <body>
+
+
+            
+            <script type='module'>
+              import { Scorm12API, Scorm2004API, } from
+              '/scorm-again/dist/esm/scorm-again.js'; window.API = new Scorm12API({
+              logLevel: 2, }); window.API_1484_11 = new Scorm2004API({ logLevel: 2 });
+            </script>
+            <script>
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw-scorm.js');
+                });
+              }
+            </script>
+
+            <iframe id='scorm-player' src='/scorms${path}'></iframe>
+
+
+          </body>
+        </html>`);
+      return;
+    }
+
     if (parsedUrl.pathname.startsWith("/scorms/")) {
       const filePath = `./public${parsedUrl.pathname}`;
       fs.stat(filePath, (err, stats) => {
